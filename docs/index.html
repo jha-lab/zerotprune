@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="We propose Zero-TPrune, a training-free token pruning framework that leverages the attention graph of pre-trained Transformer models to produce an importance distribution for tokens via our proposed Weighted Page Rank (WPR) algorithm.">
+  <meta name="keywords" content="Zero-TPrune, token pruning, training-free, vision transformer, attention-driven">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:title" content="Zero-TPrune: Zero-Shot Token Pruning through Leveraging of the Attention Graph in Pre-Trained Transformers">
+  <meta property="og:description"
+        content="We propose Zero-TPrune, a training-free token pruning framework that leverages the attention graph of pre-trained Transformer models to produce an importance distribution for tokens via our proposed Weighted Page Rank (WPR) algorithm.">
+  <meta property="og:image" content="https://github.com/zerotprune/zerotprune.github.io/blob/main/static/images/teaser.png">
+  <title>Zero-TPrune: Zero-Shot Token Pruning through Leveraging of the Attention Graph in Pre-Trained Transformers</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+  <script type="text/javascript" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/Princeton.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<!-- <nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://keunhong.com">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://hypernerf.github.io">
+            HyperNeRF
+          </a>
+          <a class="navbar-item" href="https://nerfies.github.io">
+            Nerfies
+          </a>
+          <a class="navbar-item" href="https://latentfusion.github.io">
+            LatentFusion
+          </a>
+          <a class="navbar-item" href="https://photoshape.github.io">
+            PhotoShape
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav> -->
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Zero-TPrune: Zero-Shot Token Pruning through Leveraging of the Attention Graph in Pre-Trained Transformers</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://hongjiew.github.io/">Hongjie Wang</a>,</span>
+            <span class="author-block">
+              <a href="https://bhishmadedhia.com/">Bhishma Dedhia</a>,</span>
+            <span class="author-block">
+              <a href="https://www.princeton.edu/~jha/">Niraj K. Jha</a>,
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Department of Electrical and Computer Engineering, Princeton University</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2305.17328"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- <span class="link-block">
+                <a href="https://arxiv.org/abs/2011.12948"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>Slides</span>
+                </a>
+              </span> -->
+              <!-- Video Link. -->
+              <!-- <span class="link-block">
+                <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span> -->
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/Hongjiew/Zero-TPrune"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code (coming soon)</span>
+                  </a>
+              <!-- </span> -->
+              <!-- Dataset Link. -->
+              <!-- <span class="link-block">
+                <a href="https://github.com/google/nerfies/releases/tag/0.1"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="far fa-images"></i>
+                  </span>
+                  <span>Data</span>
+                  </a> -->
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img src="./static/images/teaser.png" 
+           alt="Teaser image." 
+           class="teaser-image">
+      <h2 class="subtitle has-text-centered">
+        Comparison between Zero-TPrune and existing efficiency enhancement methods. The training-free characteristic of 
+        Zero-TPrune benefits from our graph-based algorithm exploiting correlations between image tokens.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Animation. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Off-the-Shelf Visual Examples</h2>
+
+        <img src="./static/images/visual_example.gif" 
+             alt="visual example image." 
+             class="example-image">
+        
+        <div class="content has-text-justified">
+          <p>
+            Visualized examples of the pruning process conducted by Zero-TPrune. Images are randomly selected 
+            from ImageNet validation dataset. When the pruning rate is aggressive and the main object occupies 
+            most of the image area, it is not enough to only prune background tokens. Zero-TPrune exploits similarity 
+            between main object tokens and prunes redundant ones.
+          </p>
+        </div>
+    
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- <section class="hero is-light is-small">
+  <div class="hero-body">
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-steve">
+          <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/steve.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-chair-tp">
+          <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/chair-tp.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-shiba">
+          <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/shiba.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-fullbody">
+          <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/fullbody.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-blueshirt">
+          <video poster="" id="blueshirt" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/blueshirt.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-mask">
+          <video poster="" id="mask" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/mask.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-coffee">
+          <video poster="" id="coffee" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/coffee.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-toby">
+          <video poster="" id="toby" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/toby2.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Deployment of Transformer models on edge devices is becoming increasingly challenging due to the exponentially growing 
+            inference cost that scales quadratically with the number of tokens in the input sequence. Toke pruning is an emerging 
+            solution to address this challenge due to its ease of deployment on various Transformer backbones. However, most token 
+            pruning methods require computationally expensive fine-tuning, which is undesirable in many edge deployment cases.
+          </p>
+          <p>
+            In this work, we propose <b>Zero-TPrune</b>, the first zero-shot method that considers both the importance and similarity of 
+            tokens in performing token pruning. It leverages the attention graph of pre-trained Transformer models to produce an 
+            importance distribution for tokens via our proposed Weighted Page Rank (WPR) algorithm. This distribution further guides 
+            token partitioning for efficient similarity-based pruning.
+          </p>
+          <p>
+             Due to the elimination of the fine-tuning overhead, Zero-TPrune can prune large models at negligible computational cost, 
+             switch between different pruning configurations at no computational cost, and perform hyperparameter tuning efficiently. 
+          </p>
+          <p>
+            We evaluate the performance of Zero-TPrune on vision tasks by applying it to various vision Transformer backbones and 
+            testing them on ImageNet. Without any fine-tuning, Zero-TPrune reduces the FLOPs cost of DeiT-S by 34.7% and improves 
+            its throughput by 45.3% with only 0.4% accuracy loss. Compared with state-of-the-art pruning methods that require 
+            fine-tuning, Zero-TPrune not only eliminates the need for fine-tuning after pruning but also does so with only 0.1% 
+            accuracy loss. Compared with state-of-the-art fine-tuning-free pruning methods, Zero-TPrune reduces accuracy loss by 
+            up to 49% with the same or higher throughput.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Paper video. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Framework Overview</h2>
+        <img src="./static/images/overview.png" 
+             alt="Framework overview." 
+             class="framework-image">
+             <div class="content has-text-justified">
+              <p>
+                The overall Zero-TPrune framework. Pruning layers can be inserted between Transformer blocks to reduce 
+                the number of tokens. Pruning layers comprise <b>I-stage</b> and <b>S-stage</b>: <b>I-stage</b> aims at 
+                pruning unimportant tokens of an image, such as background tokens (see (b)); <b>S-stage</b> aims at 
+                pruning tokens that are too similar to others, such as repetitive texture tokens (see (c)). 
+                A combination of the stages then maximally exploits token redundancy (see (d)).
+              </p>
+            </div>
+      </div>
+    </div>
+    <!--/ Paper video. -->
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Zero-TPrune Shows High Efficiency while Maintaining Accuracy </h2>
+        <div class="content has-text-justified">
+          <p>
+            We report the top-1 accuracy, parameters, FLOPs and throughput of the pruned models on ImageNet. We evaluate the models on 224px images unless otherwise noted.
+          </p>
+        </div>
+      </div>
+    </div>
+      
+    <div class="columns is-centered">
+      <!-- FID-CLIP Curves. -->
+      <!-- <div class="column">
+        <div class="content">
+          <h2 class="title is-4">Ablation Study</h2>
+          <img src="./static/images/ablation.png" 
+               alt="Ablation study." 
+               class="ablation-image">
+          <p>
+            Contribution breakdown of the different techniques employed in Zero-TPrune. The backbone model is DeiT-S.
+          </p>
+        </div>
+      </div> -->
+      <!--/ FID-CLIP Curves. -->
+
+      <!-- FLOPs Budgets. -->
+      <div class="column">
+        <h2 class="title is-4">Comparison with Fine-Tuning-Required Methods</h2>
+        <div class="columns is-centered">
+          <div class="column is-full-width">
+            <img src="./static/images/accu_flops.png" 
+                 alt="FLOPs budget." 
+                 class="flops-image"
+                 width="100%"
+                 height="auto">
+            <p>
+              Performance comparison between Zero-TPrune and state-of-the-art fine-tuning-required methods. The performance
+              of DynamicViT and A-ViT w/o fine-tuning equals the performance of randomly dropping tokens. 
+              Zero-TPrune can be easily applied to larger models (e.g., given a 13.6 GFLOPS budget on DeiT-B) for higher accuracy. 
+              On the contrary, applying DynamicViT and A-ViT to large models is very computationally expensive due to their 
+              expensive fine-tuning process.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/ FLOPs Budgets. -->
+
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-4">Comparison with Fine-Tuning-Free Methods </h2>
+        <div class="content has-text-justified">
+          <p>
+            Comparison between Zero-TPrune and state-of-the-art fine-tuning-free methods. The backbone model is DeiT-S.
+          </p>
+        </div>
+        <img src="./static/images/accu_flops2.png" 
+             alt="FLOPs budget." 
+             class="flops-image"
+             width="100%"
+             height="auto">
+        <img src="./static/images/throughput.png" 
+             alt="throughput." 
+             class="throughput-image"
+             width="100%"
+             height="auto">
+        <div class="content has-text-justified">
+          <p>
+            Comparison between Zero-TPrune and state-of-the-art fine-tuning-free methods on various backbones. SWAG models perform inference on 384px images.
+          </p>
+        </div>
+        <img src="./static/images/comp_free2.png" 
+             alt="FLOPs budget." 
+             class="flops-image"
+             width="100%"
+             height="auto">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{wang2023zero,
+      title={Zero-TPrune: Zero-Shot Token Pruning through Leveraging of the Attention Graph in Pre-Trained Transformers},
+      author={Wang, Hongjie and Dedhia, Bhishma and Jha, Niraj K.},
+      journal={arXiv preprint arXiv:2305.17328},
+      year={2023}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Website source based on <a href="https://github.com/nerfies/nerfies.github.io">this source code</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
