@@ -1,6 +1,6 @@
 # Zero-TPrune
 
-This is the repository that contains source code for the [Zero-TPrune website](https://zerotprune.github.io).
+This is the repository that contains source code for the [Zero-TPrune website](https://jha-lab.github.io/zerotprune/).
 
 If you find Zero-TPrune useful for your work please cite:
 ```
